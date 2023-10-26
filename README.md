@@ -27,9 +27,6 @@
     
 ## Case Study
   - ### Description
-    1. 침실에서 심정시 상태로 발견 (https://www.yna.co.kr/view/AKR20231024075000009)
-    2. 체육 활동 중 심정지 (https://news.kbs.co.kr/news/pc/view/view.do?ncd=7688894)
-    3. 심정지 골든 타임 (https://www.nhis.or.kr/magazin/mobile/201606/c06.html)
   
 ## Conclusion
   - ### 사용자와 연결된 보호자는 실시간 건강 데이터 공유를 통해 적시에 의학적 조치를 취할 수 있어 응급 상황에서의 사망률 감소 및 생명을 구할 수 있는 기회 증가
