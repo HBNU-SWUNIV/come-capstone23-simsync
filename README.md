@@ -33,6 +33,9 @@
 <img width="972" alt="스크린샷 2023-10-27 오후 7 17 36" src="https://github.com/HBNU-SWUNIV/come-capstone23-simsync/assets/57193435/36aba73b-97c5-4b18-a347-b7cf122e6752">
 
 <img width="611" alt="스크린샷 2023-10-27 오후 6 13 00" src="https://github.com/HBNU-SWUNIV/come-capstone23-simsync/assets/57193435/a3d39f32-55c9-4bfb-8f54-cbbff4b8b751">
+  
+  - ### Emergency test
+![나의 동영상](https://github.com/HBNU-SWUNIV/come-capstone23-simsync/assets/57193435/71a8ae1f-29d2-4782-b679-d37e34923344)
 
 ## Conclusion
   - ### 사용자와 연결된 보호자는 실시간 건강 데이터 공유를 통해 적시에 의학적 조치를 취할 수 있어 응급 상황에서의 사망률 감소 및 생명을 구할 수 있는 기회 증가
