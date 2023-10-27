@@ -16,6 +16,7 @@ import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
+import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -130,6 +131,7 @@ public class HomeFragment extends Fragment {
 
     // ---------------------- Notification variables ---------------------- //
     private static final String PRIMARY_CHANNEL_ID = "LOOKHEART_GUARDIAN";
+    private static final String PRIMARY_CHANNEL_NAME = "GUARDIAN";
     private int notificationId = 0;
     private boolean notificationsPermissionCheck;
     private NotificationManager notificationManager;
@@ -321,7 +323,6 @@ public class HomeFragment extends Fragment {
 
     }
 
-
     public void loadPreviousUserData(){
 
         safeGetActivity().runOnUiThread(() -> Toast.makeText(getActivity(), getResources().getString(R.string.loadUserData), Toast.LENGTH_SHORT).show());
@@ -394,7 +395,6 @@ public class HomeFragment extends Fragment {
                     }
 
                     if (i == bpmData.size() - 2){
-                        writeBpmDataToFile(startDate[0], dataList);
                         dataList.clear();
                     }
 
@@ -463,11 +463,9 @@ public class HomeFragment extends Fragment {
                 ArrayList<String> dataList = new ArrayList<>();
 
                 for(int i = 1; data.size() - 1 > i; i++) {
-
                     String stringData = (String) data.get(i);
                     String stringNextData = (String) data.get(i + 1);
 
-//                    Log.e("stringData", stringData);
                     String[] spStringData = stringData.split(",");
                     String[] nextSpStringData = stringNextData.split(",");
 
@@ -484,11 +482,6 @@ public class HomeFragment extends Fragment {
 
                     // 마지막 값
                     if ( i == data.size() - 2) {
-                        stringNextData = (String) data.get(i + 1);
-                        String[] realData = stringData.split(",", 2);
-                        dataList.add(realData[1]);
-
-                        writeHourlyDataToFile(startDate[0], dataList);
                         dataList.clear();
                     }
                 }
@@ -544,12 +537,10 @@ public class HomeFragment extends Fragment {
         retrofitServerManager.getArrData("arrEcgData", arrIdx, myEmail, startDate, targetDate, new RetrofitServerManager.ArrDataCallback() {
             @Override
             public void getData(List result) {
-
                 ArrayList<String> dataList = new ArrayList<>();
-                String preDate = null;
 
                 for(int i = 1 ; result.size() - 1 > i ; i++){
-//                    Log.e("result.get", result.get(i).toString());
+//                    Log.e("result.get", "i : " + i + " data : " + result.get(i).toString());
                     String data = (String) result.get(i);
                     String nextData = (String) result.get(i + 1);
 
@@ -559,10 +550,12 @@ public class HomeFragment extends Fragment {
                     String[] time = spData[0].split("\\|");
                     String[] nextTime = nextSpData[0].split("\\|");
 
+                    if (time.length != nextTime.length) {
+                        continue;
+                    }
+
                     String[] date = time[1].split(" ");
                     String[] nextDate = nextTime[1].split(" ");
-
-                    preDate = date[0];
 
                     if (date[0].equals(nextDate[0])) {
                         String[] realData = data.split("\\|");
@@ -576,7 +569,6 @@ public class HomeFragment extends Fragment {
                     if ( i == result.size() - 2) {
                         dataList.clear();
                     }
-
                 }
 
                 if (isAdded())
@@ -747,58 +739,13 @@ public class HomeFragment extends Fragment {
             targetDate = date.format(formatter);
             System.out.println(targetDate);
         }
-
-//        date = LocalDate.parse(targetDate, formatter);
-//        targetYear = date.format(yearFormat);
-//        targetMonth = date.format(monthFormat);
-//        targetDay = date.format(dayFormat);
-
     }
 
     public void setUI() {
-
-        allstep = 0;
-        distance = 0;
-        dCal = 0;
-        dExeCal = 0;
-        arrCnt = 0;
-
-        // 경로
-        String directoryName = "LOOKHEART/" + myEmail + "/" + currentYear + "/" + currentMonth + "/" + currentDay;
-        File directory = new File(getActivity().getFilesDir(), directoryName);
-
-        // 파일 경로와 이름
-        File file = new File(directory, "CalAndDistanceData.csv");
-
-        try {
-            // file read
-            BufferedReader br = new BufferedReader(new FileReader(file));
-            String line;
-
-            while ((line = br.readLine()) != null) {
-//                Log.e("line", line);
-                if (line.equals("null"))
-                    continue;
-                String[] columns = line.split(","); // 데이터 구분
-                allstep += Integer.parseInt(columns[2]);
-                distance += Integer.parseInt(columns[3]);
-                dCal += Integer.parseInt(columns[4]);
-                dExeCal += Integer.parseInt(columns[5]);
-                arrCnt += Integer.parseInt(columns[6]);
-            }
-
-            br.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
         eCal_value.setText((int) dExeCal + " kcal");
         step_value.setText(allstep + " step");
         distance_value.setText((String.format("%.3f", distance / 1000)) + " km");
-//        arr_value.setText(Integer.toString(arrCnt));
         temp_value.setText(String.format("%.1f", doubleTEMP) + " °C");
-
     }
 
     public void setOnBackPressed() {
@@ -924,7 +871,6 @@ public class HomeFragment extends Fragment {
         dCal = 0;
         dExeCal = 0;
         allstep = 0;
-        arrCnt = 0;
 
         safeGetActivity().runOnUiThread(() -> arrStatus());
 
@@ -975,6 +921,8 @@ public class HomeFragment extends Fragment {
             @Override
             public void userData(UserProfile user) {
 
+                Log.i("getProfile", "LoadUserData");
+
                 eCalBPM = Integer.parseInt(user.getActivityBPM());
                 sleep = Integer.parseInt(user.getSleepStart());
                 wakeup = Integer.parseInt(user.getSleepEnd());
@@ -997,11 +945,6 @@ public class HomeFragment extends Fragment {
                 userDetailsEditor.putString("o_distance", user.getDailyDistance());
 
                 userDetailsEditor.apply();
-
-                Log.e("eCalBPM", String.valueOf(eCalBPM));
-                Log.e("sleep", String.valueOf(sleep));
-                Log.e("wakeup", String.valueOf(wakeup));
-
             }
 
             @Override
@@ -1018,13 +961,13 @@ public class HomeFragment extends Fragment {
         // notification manager 생성
         notificationManager = (NotificationManager) safeGetActivity().getSystemService(Context.NOTIFICATION_SERVICE);
 
-        NotificationChannel notificationChannel = new NotificationChannel(PRIMARY_CHANNEL_ID, "Guardian", notificationManager.IMPORTANCE_HIGH);
+        NotificationChannel notificationChannel = new NotificationChannel(PRIMARY_CHANNEL_ID, PRIMARY_CHANNEL_NAME, notificationManager.IMPORTANCE_HIGH);
 
         notificationChannel.enableLights(true);
         notificationChannel.setLightColor(Color.RED);
         notificationChannel.enableVibration(true);
         notificationChannel.setDescription("Notification");
-
+        notificationChannel.setSound(Uri.parse("android.resource://" + safeGetActivity().getPackageName() + "/" + R.raw.arrsound), new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_NOTIFICATION).build());
         notificationManager.createNotificationChannel(notificationChannel);
     }
 
@@ -1068,9 +1011,6 @@ public class HomeFragment extends Fragment {
     private void heartAttackEvent(String eventTime, String location) {
 
         HeartAttackCheck = true;
-
-        Log.e("eventTime", eventTime);
-        Log.e("location", location);
 
         // 시스템 사운드 재생
         MediaPlayer mediaPlayer = MediaPlayer.create(safeGetActivity(), R.raw.heartattacksound); // res/raw 폴더에 사운드 파일을 넣어주세요
@@ -1453,7 +1393,6 @@ public class HomeFragment extends Fragment {
     private void hourlyDataLoop(){
         hourlyDataScheduler.scheduleAtFixedRate(() -> {
             responseHourlyData(currentDate, targetDate, currentYear, currentMonth, currentDay);
-            safeGetActivity().runOnUiThread(() -> setUI());
         }, 0, 10, TimeUnit.SECONDS);
     }
 
@@ -1536,6 +1475,11 @@ public class HomeFragment extends Fragment {
 
     public void responseHourlyData(String currentDate, String targetDate, String currentYear, String currentMonth, String currentDay) {
 
+        allstep = 0;
+        distance = 0;
+        dCal = 0;
+        dExeCal = 0;
+
         retrofitServerManager.getHourlyData("calandDistanceData", myEmail, currentDate, targetDate, new RetrofitServerManager.HourlyDataCallback() {
 
             @Override
@@ -1559,7 +1503,12 @@ public class HomeFragment extends Fragment {
                         for (int i = 1; data.size() > i; i++) {
                             String spData = (String) data.get(i); // data
                             String[] result = spData.split(",");
-//                            Log.e("spData", spData);
+
+                            allstep += Integer.parseInt(result[3]);
+                            distance += Integer.parseInt(result[4]);
+                            dCal += Integer.parseInt(result[5]);
+                            dExeCal += Integer.parseInt(result[6]);
+
                             String csvData = result[2] + "," + result[1] + "," + result[3] + "," + result[4] + "," + result[5] + "," + result[6] + "," + result[7];
                             fos.write(csvData.getBytes());
 
@@ -1573,12 +1522,14 @@ public class HomeFragment extends Fragment {
                                         shouldNotify(previousArrCnt, currentArrCnt, 50) ){
 
                                     safeGetActivity().runOnUiThread(() -> hourlyArrEvent(currentArrCnt));
+
                                 }
 
                                 previousArrCnt = currentArrCnt; // 현재 값을 이전 값으로 업데이트
                             }
                         }
 
+                        safeGetActivity().runOnUiThread(() -> setUI());
                         fos.close();
 
                     } catch (IOException e) {
@@ -1599,13 +1550,7 @@ public class HomeFragment extends Fragment {
 
     public void refreshArrData() {
 
-        if (arrDate == null)
-            arrDate = currentDate;
-        else
-            arrDate = "";
-
-        retrofitServerManager.getArrData("arrEcgData", arrIdx, myEmail, arrDate, targetDate, new RetrofitServerManager.ArrDataCallback() {
-
+        retrofitServerManager.getArrData("arrEcgData", arrIdx, myEmail, currentDate, targetDate, new RetrofitServerManager.ArrDataCallback() {
             @Override
             public void getData(List<String> dataList) {
 
