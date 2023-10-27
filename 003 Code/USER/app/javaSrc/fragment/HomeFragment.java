@@ -1404,8 +1404,6 @@ public class HomeFragment extends Fragment implements PermissionManager.Permissi
     }
 
     public void doLoop() {
-        Log.v("doLoop", "doLoop() Start");
-
         if (thread == null || !thread.isAlive()) {
             thread = new Thread(new Runnable() {
 
