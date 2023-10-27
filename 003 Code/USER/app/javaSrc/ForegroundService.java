@@ -53,7 +53,7 @@ public class ForegroundService extends Service {
     }
 
     public void initializeNotification(){
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "1");
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, FOREGROUND_SERVICE);
         builder.setSmallIcon(R.mipmap.ic_launcher_round);
         NotificationCompat.BigTextStyle style = new NotificationCompat.BigTextStyle();
         style.bigText(getResources().getString(R.string.serviceRunning));
